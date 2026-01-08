@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Interfone QR - Condomínio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{font-family:Arial, sans-serif;background:#f2f2f2;margin:0;padding:15px;text-align:center}
+h1{color:#2c3e50}
+input{padding:10px;width:90%;max-width:400px;border-radius:6px;border:1px solid #ccc;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-width:600px;margin:0 auto}
+.btn{background:#25D366;color:white;padding:12px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px}
+.btn:hover{background:#1ebe5d}
+#log{background:white;padding:10px;margin-top:15px;border-radius:8px;max-width:600px;margin-left:auto;margin-right:auto;text-align:left}
+#cameraBox{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8)}
+#cameraBox video{width:90%;max-width:400px;margin-top:60px;border-radius:10px}
+.close{color:white;font-size:20px;cursor:pointer}
+footer{font-size:12px;color:#666;margin-top:15px}
+</style>
+</head>
+
+<body>
+
+<h1>📞 Interfone do Condomínio</h1>
+
+<input type="text" id="search" placeholder="Buscar apartamento..." onkeyup="filterApt()">
+
+<div class="grid" id="aptos">
+
+<!-- SUBSTITUA OS NÚMEROS -->
+<script>
+let aptosHTML = "";
+for(let i=1;i<=35;i++){
+  let num = String(i).padStart(2,'0');
+  aptosHTML += `<a class="btn" data-apto="Apto ${num}" href="https://wa.me/5599999999${num}" target="_blank" onclick="registerCall('Apto ${num}')">Apto ${num}</a>`;
+}
+document.write(aptosHTML);
+</script>
+
+</div>
+
+<br>
+<button onclick="openCamera()">📷 Abrir Câmera</button>
+
+<div id="log">
+<b>📋 Registro de chamadas:</b>
+<ul id="calls"></ul>
+</div>
+
+<footer>
+Toque no apartamento para chamar no WhatsApp.<br>
+Sistema de interfone por QR Code.
+</footer>
+
+<div id="cameraBox">
+  <span class="close" onclick="closeCamera()">❌ Fechar</span><br>
+  <video id="video" autoplay></video>
+</div>
+
+<audio id="bell">
+  <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/ogg">
+</audio>
+
+<script>
+function filterApt(){
+  let input = document.getElementById("search").value.toUpperCase();
+  let btns = document.getElementsByClassName("btn");
+  for(let i=0;i<btns.length;i++){
+    let txt = btns[i].dataset.apto.toUpperCase();
+    btns[i].style.display = txt.includes(input) ? "" : "none";
+  }
+}
+
+function registerCall(apto){
+  document.getElementById("bell").play();
+  let list = document.getElementById("calls");
+  let time = new Date().toLocaleTimeString();
+  let li = document.createElement("li");
+  li.textContent = `${time} - ${apto}`;
+  list.prepend(li);
+}
+
+function openCamera(){
+  document.getElementById("cameraBox").style.display="block";
+  navigator.mediaDevices.getUserMedia({video:true})
+  .then(stream=>{
+    document.getElementById("video").srcObject=stream;
+  });
+}
+
+function closeCamera(){
+  let video = document.getElementById("video");
+  let stream = video.srcObject;
+  if(stream){
+    stream.getTracks().forEach(track=>track.stop());
+  }
+  document.getElementById("cameraBox").style.display="none";
+}
+</script>
+
+</body>
+</html>
